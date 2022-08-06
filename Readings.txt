@@ -14,6 +14,7 @@ n                 time_taken
 1000000000         2.666443
 10000000000        26.303138
 100000000000       272.370414
+Slope time vs n  = 2.723633726930646e-09
 
 _______________________________
 Recursive Fibonacci Times
@@ -70,7 +71,7 @@ n     time_taken
 48 	 114.855862
 49 	 185.971244
 
-
+Slope log_2(time) vs n = 0.20120309323859562
 
 _______________________
 Matrix Fibonacci Times 
@@ -96,5 +97,6 @@ Matrix Fibonacci Times
 100000000000000000 	 0.000078
 1000000000000000000 	 0.000094
 
+Slope of time_taken vs log_2(n) = 4.628070175438596e-06
 
 
