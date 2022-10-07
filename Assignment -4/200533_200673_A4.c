@@ -3,22 +3,29 @@
 #include<stdbool.h>
 #include<math.h>
 #include<string.h>
+#include<time.h>
+
 typedef struct node{
+    //bst node structure
     int key;
     struct node* right;
     struct node* left; 
 } node;
+
 typedef struct bst{
+    //bst structure with two additional size parameters 
+    //to check for height balance
     node* root;
     int size;
     int maxSize;
 } bst;
 
-int max(int a, int b){ //Works tested
+int max(int a, int b){ 
     return (a > b)? a: b;
 }
 
-bst* create_bst(){//Works tested
+bst* create_bst(){
+    // Dynamically allocating an empty binary search tree
     bst* temp = (bst*) malloc(sizeof(bst));    
     temp->size = 0;
     temp->maxSize = 0;
@@ -26,7 +33,8 @@ bst* create_bst(){//Works tested
     return temp;
 }
 
-node* create_node(int key){//Works tested
+node* create_node(int key){
+    //Dynamically allocating a tree node
     node* temp = (node*) malloc(sizeof(node));
     temp->key = key;
     temp->right = NULL;
@@ -35,22 +43,27 @@ node* create_node(int key){//Works tested
 }
 
 int deepHeight[10000010];
-void precomputeHeight(){ //Works Tested
+void precomputeHeight(){ 
+    //Utility function for precomputing the deep depths 
+    // i.e depths at which if a node is found then the 
+    //bst is no longer loosely height balanced
     for(int i = 1; i < 10000010; i++){
         deepHeight[i] = (int) floor(log(i)/log(4.0/3.0));
     }
 }
 
-int size(node* nd){//Works Tested
+int size(node* nd){
+    //Computes the size of the subtree at with a given root node
     if(nd == NULL) 
         return 0;
     return 1 + size(nd->right)+size(nd->left);
 }
 
-
+//Node buffer used as a stack for the rebuilding process
 node* arr[10000010];
 
-node* build(int s, int l){//Works
+node* build(int s, int l){
+    //Utility function to build a tree from from arr[s:l] recursively 
     if(l < s) return NULL;
     int mid = s + (l-s)/2;
     node* nd = arr[mid];
@@ -59,7 +72,9 @@ node* build(int s, int l){//Works
     return nd;
 }
 
-int flatten(node* nd, int s){//Works
+int flatten(node* nd, int s){
+    //Utility function to write the inorder traversal of a subtree
+    // to the array starting at the index s
     if(nd == NULL){
         return s-1;
     }
@@ -70,7 +85,8 @@ int flatten(node* nd, int s){//Works
     return flatten(nd->right, s);
 }
 
-void rebuildTree(node* nd, bst* T){//Works
+void rebuildTree(node* nd, bst* T){
+    //Recursively build a subtree with root node as nd
     bool isRoot = (nd == T->root);
     node* parent = T->root;
     bool isRightChild;
@@ -94,6 +110,11 @@ void rebuildTree(node* nd, bst* T){//Works
     T->maxSize = T->size;
 }
 void insert(int key, bst* T){
+
+    //Takes in a key to be inserted into the bst, and a bst 
+    //We find the appropriate place for insertion and if it is 
+    //a deep node then we rebalance about a scapegoat
+
     if(T->root == NULL){
         //Handle the empty tree case
         T->root = create_node(key);
@@ -101,6 +122,10 @@ void insert(int key, bst* T){
         T->maxSize = 1;
         return;
     }
+    
+    // Searching for the appropriate position for insertion 
+    // We also maintain the path taken i.e. an increasing depth
+    // stack of the ancestors of the newly added node for finding a scapegoat  
     
     int h = 1;
     node* curr = T->root;
@@ -137,17 +162,19 @@ void insert(int key, bst* T){
         rebuildTree(scapeGoat, T);
         
     }
-
+    //Updating the size parameters of the bst
     T->size = T->size + 1;
     T->maxSize = max(T->size, T->maxSize);
-    
 } 
 
-//Takes in a key to be inserted into the bst, and a bst 
-//We find the appropriate place for insertion and if it is 
-//a deep node then we rebalance about a scapegoat
 
 void delete(int val, bst* T){
+    // Takes a key to delete 
+    // If it is present in the tree
+    // we swap it with its predecessor and delete it
+    // If this makes size < 3/4*size(T)
+    // We balance the whole tree again
+
     node* temp = T->root;
     node* prev = NULL;
     while(temp != NULL){
@@ -189,13 +216,10 @@ void delete(int val, bst* T){
         }
     }
 }
-// Takes a key to delete 
-// If it is present in the tree
-// we swap it with its predecessor and delete it
-// If this makes size < 3/4*size(T)
-// We balance the whole tree again
 
-bool search(int val, bst* T){//works tested
+bool search(int val, bst* T){
+    //Query routine for the bst 
+
     node* temp = T->root;
     while(temp != NULL){
         if(temp->key == val) return true;
@@ -208,10 +232,10 @@ bool search(int val, bst* T){//works tested
     }
     return false;
 }
-//Just simple searching nothing fancy 
-
 
 void display(bst* T){
+    //Internal analysis function to ensure proper working of tree
+    // Outputs the tree by performing a bfs from the root
     node* queue[50];
     memset(queue, 0, 50*sizeof(node*));
     int i = 0;
@@ -233,50 +257,33 @@ void display(bst* T){
     }
 
 }
-/*
-                            4
-                    2               6
-                1       3       5       7
-            0
 
-0 1 2 3 5 6 7 8
-                3
-        1               5    
-    0       2       4       6
-                                7
-*/
+void test1(){
+    for(int i = 1; i <= 200; i++){
+        printf("%d\t%d", 5*i*10000, time[50000*i]);
+    }
+}
+
+void test2(){
+    for(int i = 100000; i <= 1000000; i++){
+        printf("%d\t%d", i, time[i]);
+    }
+}
+double time[10000010];
 int main(){
+    time[0] = 0;
     bst* T = create_bst();
     precomputeHeight();
-    /*
-    T->root = create_node(4);
-    T->root->right = create_node(6);
-    T->root->left = create_node(2);
-    T->root->left->left = create_node(1);
-    T->root->left->right = create_node(3);
-    T->root->left->left->left = create_node(0);
-    T->root->right->left = create_node(5);
-    */
-    /*
-    T->root->right->right = create_node(7);
-    */  
-    int a[] = {3, 1, 5, 0, 2, 4, 6, 7};
-    for(int i = 0; i < 16; i++) {
+    for(int i = 1; i <= 10000000; i++) {
+        clock_t start_t, end_t;
+        double total_t;
+        start_t = clock();
         insert(i, T);
-        printf("\n\n");
-        display(T);
+        end_t = clock();
+        total_t = (double) (end_t-start_t)/CLOCKS_PER_SEC;
+        time[i] = total_t;
     }
-    
-   /*
-    T->root = create_node(0);
-    node* nd = T->root;
-    for(int i = 1; i < 7; i++){
-        nd->right = create_node(i);
-        nd = nd->right;
-    }
-    T->size = 7;
-    insert(7, T);
-    */
-    //printf("%d", T->root->key);
+
+    test1();
     return 0;
 }
